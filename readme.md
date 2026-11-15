@@ -1,8 +1,30 @@
 # Lazy Dunmas
 
-Rules disputes at a D&D table, answered by a local model from the SRD 5.1, every ruling citing the sections it rests on, plus an evaluation harness that measures retrieval and answers separately against a gold set.
+Rules disputes at a D&D table, answered by a model from the SRD 5.1, every ruling citing the sections it rests on, plus an evaluation harness that measures retrieval and answers separately against a gold set.
 
-<!-- Demo video and screenshots go here. -->
+## What it does
+
+### Ask a rules dispute
+
+![A rules question typed and asked, and the ruling streaming in phase by phase](docs/media/ask.gif)
+
+Ask one rules question. A model checks that it is about the rules, splits it into the rules it turns on, retrieves ten SRD entries for them, and rules from those alone: a verdict, an ambiguity flag, an explanation and the entries it cites. Each phase streams to the screen as it lands.
+
+### Citations and the source panel
+
+![A cited entry opened beside the ruling, and the panel flipped between its formatted view and its source text](docs/media/panel.gif)
+
+The explanation links every entry it names, the ruling lists the ones it cites, and the ten it was handed are a click away. Each opens beside the ruling as the encyclopedia shows it: formatted, or as the text the model was handed, a tab away.
+
+### The encyclopedia
+
+![The spells table narrowed to 3rd-level evocation, and Fireball opened in the panel](docs/media/encyclopedia.gif)
+
+The SRD's spells, magic items, monsters, weapons and armor, races, conditions and weapon properties, in a table to search, filter and sort. A row opens in the same panel. It reads the data files in the browser, so browsing needs neither the server nor a model.
+
+## Measured
+
+An evaluation harness scores retrieval and rulings separately, on a held-out test split of 67 gold items, with a judge checked against hand grades before its scores were counted. At level 3, what the screen runs, `qwen3.5:9b` agrees with the gold verdict on 44 of 55; Opus 5.5 driving the tool loop, the ceiling, on 53; and a floor that answers "no" to every item on 27. Each row is one draw; [the results](docs/results.md) set out every stage and model, and how far the 9b's draws move.
 
 ## Running it
 
