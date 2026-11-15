@@ -6,6 +6,7 @@ Serves on port 8000 once the corpus is embedded, against the live Ollama
 server.
 """
 
+import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from functools import partial
@@ -13,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 import ollama
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.sse import EventSourceResponse, ServerSentEvent
 from pydantic import BaseModel
@@ -22,23 +24,50 @@ from rules_attorney.app.stream import Call, Calls, run
 from rules_attorney.corpus import load_corpus
 from rules_attorney.gate import Gate
 from rules_attorney.multihop import Plan
-from rules_attorney.retrieve import NOMIC, embed_documents, ollama_embed
+from rules_attorney.retrieve import Embedder, embed_documents, ollama_embed
 
-DATA = Path(__file__).resolve().parents[3] / "data" / "srd-5.1"
-# The model level 3 was measured on, for the gate, the plan and the ruling.
-MODEL = "qwen3.5:9b"
+ROOT = Path(__file__).resolve().parents[3]
+DATA = ROOT / "data" / "srd-5.1"
+MODEL_VAR = "LAZY_DUNMAS_MODEL"
+EMBED_MODEL_VAR = "LAZY_DUNMAS_EMBED_MODEL"
+QUERY_PREFIX_VAR = "LAZY_DUNMAS_QUERY_PREFIX"
+DOCUMENT_PREFIX_VAR = "LAZY_DUNMAS_DOCUMENT_PREFIX"
 
 # Async, so a stop or the run's limit cancels the request in flight, which
 # closes it and ends Ollama's generation with it.
 client = ollama.AsyncClient()
 
 
-def served(schema: dict[str, Any]) -> Call:
+def required(var: str) -> str:
+    """A model name from the environment, refusing one that is unset or blank."""
+    value = os.environ.get(var, "").strip()
+    if not value:
+        raise RuntimeError(
+            f"Set {var} in .env to an Ollama model, as `ollama list` names it."
+        )
+    return value
+
+
+def chat_model() -> str:
+    """The chat model for the gate, the plan and the ruling."""
+    return required(MODEL_VAR)
+
+
+def embedder() -> Embedder:
+    """The embedding model for the search, and the prefixes its card asks for."""
+    return Embedder(
+        model=required(EMBED_MODEL_VAR),
+        query_prefix=os.environ.get(QUERY_PREFIX_VAR, ""),
+        document_prefix=os.environ.get(DOCUMENT_PREFIX_VAR, ""),
+    )
+
+
+def served(schema: dict[str, Any], model: str) -> Call:
     """A model call through Ollama, held to the schema given."""
 
     async def call(prompt: str) -> str:
         try:
-            response = await client.chat(**chat_request(prompt, MODEL, schema))
+            response = await client.chat(**chat_request(prompt, model, schema))
         except ollama.ResponseError as error:
             # Ollama is up but refused the call, a model not pulled among the
             # reasons, so the run ends as one whose model cannot be reached.
@@ -51,15 +80,19 @@ def served(schema: dict[str, Any]) -> Call:
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Embed the corpus once, at startup, and keep the calls a run makes."""
+    load_dotenv(ROOT / ".env")
+    model = chat_model()
+    search = embedder()
     entries = load_corpus(DATA)
-    embed = partial(ollama_embed, model=NOMIC.model)
+    embed = partial(ollama_embed, model=search.model)
     app.state.entries = entries
-    app.state.matrix = embed_documents([entry.text for entry in entries], NOMIC, embed)
+    app.state.matrix = embed_documents([entry.text for entry in entries], search, embed)
     app.state.calls = Calls(
-        gate=served(Gate.model_json_schema()),
-        plan=served(Plan.model_json_schema()),
-        answer=served(Ruling.model_json_schema()),
+        gate=served(Gate.model_json_schema(), model),
+        plan=served(Plan.model_json_schema(), model),
+        answer=served(Ruling.model_json_schema(), model),
         embed=embed,
+        embedder=search,
     )
     yield
 

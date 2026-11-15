@@ -12,7 +12,7 @@ from rules_attorney.answer import build_prompt, parse_reply
 from rules_attorney.corpus import Entry
 from rules_attorney.gate import build_gate_prompt, parse_gate
 from rules_attorney.multihop import build_plan_prompt, merged_ranking, parse_plan
-from rules_attorney.retrieve import NOMIC, Embed, embed_query, rank
+from rules_attorney.retrieve import Embed, Embedder, embed_query, rank
 
 # The whole run's limit, in seconds. On level 3's dev run the slowest ruling
 # that parsed took 9.4 seconds and the one that looped to its cap took 44.8.
@@ -32,6 +32,7 @@ class Calls:
     plan: Call
     answer: Call
     embed: Embed
+    embedder: Embedder
 
 
 @dataclass(frozen=True)
@@ -81,7 +82,9 @@ async def run(
         async with asyncio.timeout_at(deadline):
             for text in [question, *sub_questions]:
                 # embed_query blocks, so it runs on a worker thread.
-                vector = await asyncio.to_thread(embed_query, text, NOMIC, calls.embed)
+                vector = await asyncio.to_thread(
+                    embed_query, text, calls.embedder, calls.embed
+                )
                 rankings.append(rank(vector, matrix, paths))
         top = merged_ranking(rankings[0], rankings[1:])[:K]
         handed = [by_path[path] for path in top]

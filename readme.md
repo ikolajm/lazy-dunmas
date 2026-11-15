@@ -24,18 +24,15 @@ The SRD's spells, magic items, monsters, weapons and armor, races, conditions an
 
 ## Measured
 
-An evaluation harness scores retrieval and rulings separately, on a held-out test split of 67 gold items, with a judge checked against hand grades before its scores were counted. At level 3, what the screen runs, `qwen3.5:9b` agrees with the gold verdict on 44 of 55; Opus 5.5 driving the tool loop, the ceiling, on 53; and a floor that answers "no" to every item on 27. Each row is one draw; [the results](docs/results.md) set out every stage and model, and how far the 9b's draws move.
+An evaluation harness scores retrieval and rulings separately, on a held-out test split of 67 gold items, with a judge checked against hand grades before its scores were counted. Measured with `qwen3.5:9b` at level 3, the pipeline the screen runs, the verdict agrees with gold on 44 of 55; Opus 5.5 driving the tool loop, the ceiling, on 53; and a floor that answers "no" to every item on 27. Each row is one draw; [the results](docs/results.md) set out every stage and model, and how far the 9b's draws move.
 
 ## Running it
 
 You need Python 3.12 or later, Node 20.19 or 22.12 or later, and Ollama.
 
-Pull the two models:
+Pull a chat model and an embedding model of your choice through Ollama.
 
-```
-ollama pull qwen3.5:9b
-ollama pull nomic-embed-text
-```
+The published results were measured with `qwen3.5:9b` and `nomic-embed-text`. A chat model that fails `scripts/evals/check_key_order.py` writes its verdict before its reasoning, so its rulings will not match what was measured.
 
 Install the server and the screen, from the repository root:
 
@@ -47,6 +44,8 @@ npm install
 ```
 
 On macOS or Linux, the venv's Python is `.venv/bin/python` rather than `.venv/Scripts/python`.
+
+Copy `.env.example` to `.env` and fill it in: the two models' names, as `ollama list` shows them, and any query and document prefixes your embedding model's card asks for. The server will not start without both models.
 
 Then, each in a terminal of its own, with Ollama running:
 

@@ -12,6 +12,7 @@ dependencies = [
     "numpy>=2.5",
     "ollama>=0.6",
     "pydantic>=2.14",
+    "python-dotenv>=1.1",
     "uvicorn>=0.54",
 ]
 
