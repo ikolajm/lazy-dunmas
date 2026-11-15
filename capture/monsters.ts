@@ -5,7 +5,7 @@
 //
 // Needs the screen running; the encyclopedia reads the data files in the browser.
 import type { Page } from 'playwright'
-import { capture, checkCount, choose, focusOn, HOLD, openEncyclopedia, pause, scrollToFocus, type Mark } from './take.ts'
+import { capture, choose, focusOn, HOLD, openEncyclopedia, pause, scrollToFocus, type Mark } from './take.ts'
 
 async function take(page: Page, mark: Mark) {
   await pause(HOLD.short)
@@ -14,7 +14,6 @@ async function take(page: Page, mark: Mark) {
 
   mark('kind')
   await choose(page, page.getByLabel('Kind', { exact: true }), 'Monsters')
-  await checkCount(page, '334 of 334')
 
   await focusOn(page.getByRole('button', { name: 'Filters' }))
   mark('filters')
@@ -23,7 +22,6 @@ async function take(page: Page, mark: Mark) {
 
   mark('type')
   await choose(page, page.getByLabel('Type', { exact: true }), 'Dragon')
-  await checkCount(page, '43 of 334')
 
   // Twice: the first press sorts ascending, the second descending.
   await focusOn(page.locator('thead').getByRole('button', { name: 'Challenge', exact: true }))

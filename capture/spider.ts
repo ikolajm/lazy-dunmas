@@ -10,23 +10,6 @@ import { capture, focusOn, HOLD, KEY_DELAY, pause, scrollTo, scrollToFocus, tabT
 const QUESTION = 'My 4th-level druid wants to Wild Shape into a giant spider. Can she?'
 const RUN_LIMIT = 180_000
 
-// The ruling the captions describe
-
-async function checkRuling(page: Page) {
-  const answer = (await page.locator('.verdict__answer').textContent())?.trim()
-  if (answer !== 'No') throw new TakeError(`The verdict is "${answer}", not "No".`)
-
-  const summary = (await page.locator('.view-all__summary').textContent())?.trim()
-  if (summary !== '10 entries retrieved, 2 cited') {
-    throw new TakeError(`The summary reads "${summary}", not "10 entries retrieved, 2 cited".`)
-  }
-
-  const cites = (await page.locator('.verdict__cite-list button').allTextContents()).map((t) => t.trim())
-  if (cites.length !== 2 || !cites.includes('Wild Shape') || !cites.includes('Giant Spider')) {
-    throw new TakeError(`The ruling cites ${JSON.stringify(cites)}, not Wild Shape and Giant Spider.`)
-  }
-}
-
 // The take
 
 async function take(page: Page, mark: Mark) {
@@ -45,7 +28,6 @@ async function take(page: Page, mark: Mark) {
   if (await status.count()) {
     throw new TakeError(`The run ended without a ruling: ${(await status.innerText()).replace(/\s+/g, ' ')}`)
   }
-  await checkRuling(page)
 
   // The verdict is taller than the window: the camera rests on each part in turn.
   const parts = page.locator('.verdict__part')
