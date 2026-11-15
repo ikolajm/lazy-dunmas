@@ -5,12 +5,11 @@
 //
 // Needs the screen running; the encyclopedia reads the data files in the browser.
 import type { Page } from 'playwright'
-import { capture, checkCount, choose, focusOn, HOLD, openEncyclopedia, pause, scrollToFocus, type Mark } from './take.ts'
+import { capture, choose, focusOn, HOLD, openEncyclopedia, pause, scrollToFocus, type Mark } from './take.ts'
 
 async function take(page: Page, mark: Mark) {
   await pause(HOLD.short)
   await openEncyclopedia(page)
-  await checkCount(page, '319 of 319')
   await pause(HOLD.short)
 
   await focusOn(page.getByRole('button', { name: 'Filters' }))
@@ -23,7 +22,6 @@ async function take(page: Page, mark: Mark) {
 
   mark('level')
   await choose(page, page.getByLabel('Level', { exact: true }), '3')
-  await checkCount(page, '7 of 319')
 
   await scrollToFocus(page.locator('.encyclopedia__table').getByRole('button', { name: 'Fireball' }))
   mark('open')

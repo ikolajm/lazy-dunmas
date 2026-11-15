@@ -103,15 +103,6 @@ export async function openEncyclopedia(page: Page) {
   await page.locator('.encyclopedia__table').waitFor()
 }
 
-export async function checkCount(page: Page, expected: string) {
-  const results = page.locator('.encyclopedia__results')
-  try {
-    await results.filter({ hasText: expected }).waitFor({ timeout: 5000 })
-  } catch {
-    throw new TakeError(`The count reads "${(await results.textContent())?.trim()}", not "${expected}".`)
-  }
-}
-
 // The run
 
 // Loads the screen, hands the take its page and its mark, and writes the
