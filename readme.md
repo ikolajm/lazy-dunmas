@@ -1,4 +1,4 @@
-# Lazy-dunmas (DnD Rules Attorney)
+# Lazy Dunmas
 
 Rules disputes at a D&D table, answered by a local model from the SRD 5.1, every ruling citing the sections it rests on, plus an evaluation harness that measures retrieval and answers separately against a gold set.
 
