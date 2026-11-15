@@ -8,6 +8,7 @@ from numpy.typing import NDArray
 
 from rules_attorney.app.stream import Call, Calls, Event, run
 from rules_attorney.corpus import Entry
+from rules_attorney.retrieve import Embedder
 
 QUESTION = "Can a grappled creature still attack?"
 ENTRIES = [
@@ -15,6 +16,7 @@ ENTRIES = [
     Entry("actions-in-combat > attack", "You make one melee or ranged attack."),
 ]
 MATRIX = np.array([[1.0, 0.0], [0.0, 1.0]])
+EMBEDDER = Embedder(model="some-embedder", query_prefix="", document_prefix="")
 
 GATE_PASS = '{"about_rules": true}'
 GATE_REFUSE = '{"about_rules": false}'
@@ -49,7 +51,7 @@ def calls(
     gate: Call = PASSING, plan: Call = PLANNING, answer: Call = RULING_CALL
 ) -> Calls:
     """Fake calls that rule, with any of them swapped."""
-    return Calls(gate=gate, plan=plan, answer=answer, embed=embed)
+    return Calls(gate=gate, plan=plan, answer=answer, embed=embed, embedder=EMBEDDER)
 
 
 def collect(fakes: Calls) -> list[Event]:
