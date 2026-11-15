@@ -49,20 +49,25 @@ export async function focusOn(locator: Locator) {
   await pause(FOCUS_HOLD)
 }
 
-// Scrolls the page smoothly until the control sits mid-screen, clear of both
-// sticky bars, then focuses it where it stands.
-export async function scrollToFocus(locator: Locator) {
+// Scrolls the page smoothly until the element sits mid-screen, clear of both
+// sticky bars.
+export async function scrollTo(locator: Locator) {
   await locator.evaluate(
     (el, limit) =>
       new Promise<void>((resolve) => {
         const done = () => resolve()
         window.addEventListener('scrollend', done, { once: true })
-        // No scrollend fires when the control is already mid-screen.
+        // No scrollend fires when the element is already mid-screen.
         setTimeout(done, limit)
         el.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }),
     SCROLL_LIMIT,
   )
+}
+
+// Scrolls the control mid-screen, then focuses it where it stands.
+export async function scrollToFocus(locator: Locator) {
+  await scrollTo(locator)
   await locator.evaluate((el) => (el as HTMLElement).focus({ preventScroll: true }))
   if (!(await isFocused(locator))) throw new TakeError(`${locator} did not take focus.`)
   await pause(FOCUS_HOLD)
