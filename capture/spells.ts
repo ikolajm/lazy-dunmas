@@ -30,6 +30,11 @@ async function take(page: Page, mark: Mark) {
   await page.keyboard.press('Enter')
   await page.locator('#source-title').filter({ hasText: 'Fireball' }).waitFor()
   await pause(HOLD.read)
+
+  mark('close')
+  await page.keyboard.press('Escape')
+  await page.locator('.source-panel').waitFor({ state: 'detached' })
+  await pause(HOLD.read)
 }
 
 await capture('spells', take)

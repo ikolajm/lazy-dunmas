@@ -5,7 +5,7 @@
 //
 // Needs the server and the screen running, as the readme sets out.
 import type { Page } from 'playwright'
-import { capture, focusOn, HOLD, KEY_DELAY, pause, scrollToFocus, tabTo, TakeError, type Mark } from './take.ts'
+import { capture, focusOn, HOLD, KEY_DELAY, pause, scrollTo, scrollToFocus, tabTo, TakeError, type Mark } from './take.ts'
 
 const QUESTION = 'My 4th-level druid wants to Wild Shape into a giant spider. Can she?'
 const RUN_LIMIT = 180_000
@@ -45,8 +45,20 @@ async function take(page: Page, mark: Mark) {
   if (await status.count()) {
     throw new TakeError(`The run ended without a ruling: ${(await status.innerText()).replace(/\s+/g, ' ')}`)
   }
-  mark('verdict')
   await checkRuling(page)
+
+  // The verdict is taller than the window: the camera rests on each part in turn.
+  const parts = page.locator('.verdict__part')
+  await scrollTo(page.locator('.verdict__answer'))
+  mark('verdict')
+  await pause(HOLD.read)
+
+  await scrollTo(parts.filter({ hasText: 'Explanation' }))
+  mark('explanation')
+  await pause(HOLD.read)
+
+  await scrollTo(parts.filter({ hasText: 'Citations' }))
+  mark('citations')
   await pause(HOLD.read)
 
   await scrollToFocus(page.locator('.view-all__summary'))
