@@ -120,9 +120,3 @@ main.empty h1 {
 .attribution {
   text-align: center;
 }
-
-/* The reset zeroes only body's margin, so the UA's h2 and p margins stack on Loom's dialog gap. */
-.dialog-title,
-.dialog-description {
-  margin: 0;
-}
