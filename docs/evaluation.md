@@ -29,7 +29,7 @@ The judge and the hosted rows call the Claude API and authenticate with the prof
 The rerank scripts need the `rerank` extra, sentence-transformers on PyTorch, which the screen does not use. On Windows, PyPI's torch is CPU-only, so it comes from PyTorch's CUDA 13.2 index:
 
 ```
-.venv/Scripts/python -m pip install -e ".[dev,rerank]" --extra-index-url https://download.pytorch.org/whl/cu132
+python -m pip install -e ".[dev,rerank]" --extra-index-url https://download.pytorch.org/whl/cu132
 ```
 
 ## Measuring your own model
@@ -39,7 +39,7 @@ A model pulled into Ollama is measured on the test split, the split the publishe
 **1. The key-order check.** The ruling's fields are ordered so the model reasons and flags before it rules, and some models' templates make Ollama sort a schema's keys. A model that fails this check rules before it reasons, and its row would not measure the same thing:
 
 ```
-.venv/Scripts/python scripts/evals/check_key_order.py <model>
+python scripts/evals/check_key_order.py <model>
 ```
 
 The model runs with its template and penalties as shipped, and no row gets a prompt of its own.
@@ -47,13 +47,13 @@ The model runs with its template and penalties as shipped, and no row gets a pro
 **2. The answers.** One record per test item, written to `runs/<stamp>-test-<model>.jsonl`, any `:` in the model's name written as `-`. `--level 3` has the model plan sub-questions first and writes `runs/<stamp>-test-level3-<model>.jsonl`:
 
 ```
-.venv/Scripts/python scripts/evals/answer_dev.py <model> --split test
+python scripts/evals/answer_dev.py <model> --split test
 ```
 
 **3. Retrieval.** recall@k and all-cites@k on the ten entries the model was handed, read beside [the Retrieval table](results.md#retrieval):
 
 ```
-.venv/Scripts/python scripts/evals/score_handed.py runs/<run>.jsonl
+python scripts/evals/score_handed.py runs/<run>.jsonl
 ```
 
 At level 1 these are the embedder's, the same for every answering model; at level 3 they are the model's plans, which change from draw to draw. This is as far as the measurement goes without a Claude account. To compare an embedder instead, add it to `EMBEDDERS` in `src/rules_attorney/retrieve.py` and run `scripts/evals/eval_retrieval.py`.
@@ -61,13 +61,13 @@ At level 1 these are the embedder's, the same for every answering model; at leve
 **4. The judge.** Claude Sonnet 5.5 decides each verdict's agreement and writes `runs/<run>.judged-claude-sonnet-5-5.jsonl` beside the run. It needs a Claude account, authenticated as above:
 
 ```
-.venv/Scripts/python scripts/evals/judge_dev.py runs/<run>.jsonl
+python scripts/evals/judge_dev.py runs/<run>.jsonl
 ```
 
 **5. The table.** Your row, with any published run after it for comparison, here `qwen3.5:9b` at level 1:
 
 ```
-.venv/Scripts/python scripts/evals/summarize_runs.py --table runs/<run>.jsonl results/test/20261109-144535-test-qwen3.5-9b.jsonl
+python scripts/evals/summarize_runs.py --table runs/<run>.jsonl results/test/20261109-144535-test-qwen3.5-9b.jsonl
 ```
 
 An answer run is one draw. Rerun on the same prompts, `qwen3.5:9b`'s agreement moved by up to four items, and one item of 55 is about 1.8 points, so a gap of one item between rows is not a finding.

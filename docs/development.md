@@ -2,13 +2,13 @@
 
 ## Checks
 
-From the repository root:
+From the repository root, in the environment the package is installed in:
 
 ```
-.venv/Scripts/python -m pytest
-.venv/Scripts/python -m ruff check .
-.venv/Scripts/python -m ruff format --check .
-.venv/Scripts/python -m mypy
+python -m pytest
+python -m ruff check .
+python -m ruff format --check .
+python -m mypy
 ```
 
 From `web/`. The tests run TypeScript directly, which takes Node 22.18 or later:
