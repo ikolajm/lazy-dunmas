@@ -34,23 +34,20 @@ Pull a chat model and an embedding model of your choice through Ollama.
 
 The published results were measured with `qwen3.5:9b` and `nomic-embed-text`. A chat model that fails `scripts/evals/check_key_order.py` writes its verdict before its reasoning, so its rulings will not match what was measured.
 
-Install the server and the screen, from the repository root:
+Install the server and the screen, from the repository root, in a Python environment of your choice:
 
 ```
-python -m venv .venv
-.venv/Scripts/python -m pip install -e ".[dev]"
+python -m pip install -e ".[dev]"
 cd web
 npm install
 ```
-
-On macOS or Linux, the venv's Python is `.venv/bin/python` rather than `.venv/Scripts/python`.
 
 Copy `.env.example` to `.env` and fill it in: the two models' names, as `ollama list` shows them, and any query and document prefixes your embedding model's card asks for. The server will not start without both models.
 
 Then, each in a terminal of its own, with Ollama running:
 
 ```
-.venv/Scripts/python -m uvicorn rules_attorney.app.server:app
+python -m uvicorn rules_attorney.app.server:app
 ```
 
 ```
